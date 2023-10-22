@@ -1,6 +1,7 @@
 import Joi from "joi";
 import bcrypt from "bcrypt";
 import config from "../config/default.mjs";
+import * as  jwt from "jsonwebtoken";
 
 // --------- SCHEMAS --------------------
 export const userSchemaRegister = Joi.object({
@@ -10,6 +11,11 @@ export const userSchemaRegister = Joi.object({
 	phone: Joi.string().required(),
 	fullname: Joi.string().required(),
 });
+
+export const userSchemaLogin = Joi.object({
+	password: Joi.string().min(8).required(),
+	email: Joi.string().email().required(),
+})
 
 // ---------- OTHER UTILS ---------------
 export async function getHash(hash) {
@@ -42,3 +48,11 @@ export async function comparePassword(inputPassword, hashedPassword) {
 		throw error;
 	}
 }
+
+export function generateJwtToken(payload){
+	const options = {
+  		expiresIn: config.loginExpiry
+	};
+	return jwt.sign(payload,config.jwtSecret,options);
+}
+

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { login, register } from "../controllers/auth.controller.js";
 import { validateBody } from "../middlewares/validateBody.js";
-import { userSchemaRegister } from "../utils/auth.util.js";
+import { userSchemaLogin, userSchemaRegister } from "../utils/auth.util.js";
 
 const authRouter = Router();
 
@@ -10,5 +10,11 @@ authRouter.post(
 	validateBody(userSchemaRegister),
 	register
 );
-authRouter.get("/login", login);
+
+authRouter.post(
+	"/login",
+	validateBody(userSchemaLogin),
+	login
+);
+
 export default authRouter;
