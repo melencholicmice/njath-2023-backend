@@ -2,51 +2,42 @@ import express from "express";
 import cors from "cors";
 import * as crypto from "crypto";
 
+import config from "./config/default.mjs";
+import logger from "./utils/logger.js";
+import morgan from "morgan";
+import authRouter from "./routes/auth.route.js";
+import { connectdb } from "./utils/connectDb.js";
+
 const app = express();
 
+// Middlewares
 app.use(cors());
-
 app.use(express.json());
 
-var creds = [];
+//  :TODO: Move it somewhere else
+morgan.token("pino-logger", (req, res) => {
+	// all it does is print incoming http request
+	logger.info({ method: req.method, url: req.originalUrl }, "HTTP Request");
+	return "";
+});
+app.use(morgan(":pino-logger"));
+
+app.listen(config.port, () => {
+	logger.info("🚀 Server is running on port 8080");
+});
+connectdb();
+
+// Routes
+
+app.use("/api/auth", authRouter);
 
 app.use((err, req, res, next) => {
 	console.error(err.stack);
 	res.status(500).send("Something broke 💩");
 });
 
-app.listen(8080, () => {
-	console.log("Server is running on port 8080");
-});
-
-async function getHash(hash) {
-	return crypto.webcrypto.subtle
-		.digest("SHA-256", new TextEncoder().encode(hash))
-		.then((result) => Array.from(new Uint8Array(result)))
-		.then((result) => result.map((b) => b.toString(16).padStart(2, "0")).join(""))
-		.then((result) => {
-			return result;
-		});
-}
-
-app.post("/auth", async (req, res) => {
-	const pair = req.body;
-	getHash(pair.hash).then((result) => {
-		if (creds.find((cred) => cred.id == pair.id && cred.hash === result)) res.status(200).send("Correct");
-		else res.status(401).send("Incorrect");
+app.use("*", (req, res, next) => {
+	return res.status(404).json({
+		message: "Not found",
 	});
-});
-
-app.post("/register", async (req, res) => {
-	const list = req.body;
-	console.log(list.hash);
-	if (creds.find((cred) => cred.id == list.id || creds.phone == list.phone)) res.status(409).send("Already Exists");
-	else {
-		getHash(list.hash).then((result) => {
-			console.log(result);
-			creds = [...creds, { ...list, hash: result }];
-			console.log(creds);
-			res.status(201).send("Registered");
-		});
-	}
 });
