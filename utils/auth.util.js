@@ -1,7 +1,7 @@
 import Joi from "joi";
 import bcrypt from "bcrypt";
 import config from "../config/default.mjs";
-import * as  jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
 // --------- SCHEMAS --------------------
 export const userSchemaRegister = Joi.object({
@@ -53,6 +53,16 @@ export function generateJwtToken(payload){
 	const options = {
   		expiresIn: config.loginExpiry
 	};
-	return jwt.sign(payload,config.jwtSecret,options);
+	const token = jwt.sign(payload,config.jwtSecret,options);
+	return token;
 }
 
+export function checkJwtToken(token){
+	try{
+		const decoded = jwt.verify(token,config.jwtSecret);
+		return decoded
+	}
+	catch(error){
+		throw error;
+	}
+}

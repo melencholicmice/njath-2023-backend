@@ -8,5 +8,6 @@ export default {
 	initialPoints: 100,
 	saltRounds: 10,
 	allowedLoan:2,
-	loginExpiry:'5h'
+	loginExpiry:'300h',
+	cookieExpiry:1080000, // recommended to keep loginExpiry and cookie expiry the same
 };

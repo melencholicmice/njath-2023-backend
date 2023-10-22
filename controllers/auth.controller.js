@@ -1,3 +1,4 @@
+import config  from "../config/default.mjs";
 import { USER_ROLE, User } from "../models/user.model.js";
 import { getHash, hashPassword ,comparePassword, generateJwtToken} from "../utils/auth.util.js";
 import logger from "../utils/logger.js";
@@ -73,8 +74,8 @@ export const login = async (req , res) => {
 			const acessToken = generateJwtToken(payload);
 
 			res.cookie('access_token', acessToken, {
-			    httpOnly: true,
-			    maxAge: tokenExpiration,
+			    // httpOnly: true,
+			    maxAge: config.cookieExpiry,
 			});
 
 			return res.status(200).json({
