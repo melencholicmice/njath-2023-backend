@@ -37,7 +37,6 @@ export const  checkUser =  (userRole) => {
             }
 
             if(user.role !== userRole){
-                console.log(user)
                 return res.status(403).json({
                     success:false,
                     message:"You are not authorised for this action"

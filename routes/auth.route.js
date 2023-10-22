@@ -1,5 +1,5 @@
-import { Router } from "express";
-import { login, register } from "../controllers/auth.controller.js";
+import { Router, application } from "express";
+import { login, registerOrganiser, registerParticipant } from "../controllers/auth.controller.js";
 import { validateBody } from "../middlewares/validateBody.js";
 import { userSchemaLogin, userSchemaRegister } from "../utils/auth.util.js";
 import { checkUser } from "../middlewares/checkUser.js";
@@ -10,8 +10,15 @@ const authRouter = Router();
 authRouter.post(
 	"/register-participant",
 	validateBody(userSchemaRegister),
-	register
+	registerParticipant(USER_ROLE.ORGANIZER)
 );
+
+authRouter.post(
+	"/register-organiser",
+	validateBody(userSchemaRegister),
+	checkUser(USER_ROLE.ADMIN),
+	registerParticipant(USER_ROLE.PARTICIPANT)
+)
 
 authRouter.get(
 	"/login",
