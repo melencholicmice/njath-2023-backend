@@ -2,6 +2,8 @@ import Joi from "joi";
 import bcrypt from "bcrypt";
 import config from "../config/default.mjs";
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer'
+import logger from "./logger.js";
 
 // --------- SCHEMAS --------------------
 export const userSchemaRegister = Joi.object({
@@ -15,6 +17,15 @@ export const userSchemaRegister = Joi.object({
 export const userSchemaLogin = Joi.object({
 	password: Joi.string().min(8).required(),
 	email: Joi.string().email().required(),
+})
+
+export const userSchemaForgetPassword = Joi.object({
+	email: Joi.string().email().required(),
+	phone: Joi.string().required(),
+})
+
+export const userSchemaResetPassword = Joi.object({
+	password: Joi.string().min(8).required(),
 })
 
 // ---------- OTHER UTILS ---------------
@@ -64,5 +75,37 @@ export function checkJwtToken(token){
 	}
 	catch(error){
 		throw error;
+	}
+}
+
+export async function sendMail(to,subject,text){
+	const transporter = nodemailer.createTransport({
+		host:"smtp.gmail.com",
+		port:587,
+		secure:false,
+		auth:{
+			user:config.smtpEmail,
+			pass:config.appPassword,
+		},
+		tls: {
+      		// do not fail on invalid certs
+      		rejectUnauthorized: false,
+    	},
+	})
+
+	const mailData = {
+		from:config.smtpEmail,
+		to:to,
+		subject:subject,
+		text:text,
+	}
+
+	try{
+		await transporter.sendMail(mailData);
+		return true;
+	}
+	catch(e){
+		logger.error(e);
+		return false;
 	}
 }

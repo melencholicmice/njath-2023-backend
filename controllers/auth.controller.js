@@ -1,6 +1,6 @@
 import config  from "../config/default.mjs";
 import { Organizer, Participant, USER_ROLE, User } from "../models/user.model.js";
-import { getHash, hashPassword ,comparePassword, generateJwtToken} from "../utils/auth.util.js";
+import { getHash, hashPassword ,comparePassword, generateJwtToken, sendMail, checkJwtToken} from "../utils/auth.util.js";
 import logger from "../utils/logger.js";
 
 
@@ -40,12 +40,7 @@ export const registerParticipant = (role) => {
 				});
 			}
 		}
-};
-}
-
-
-export const registerOrganiser = async(req,res) => {
-
+    };
 }
 
 export const login = async (req , res) => {
@@ -104,4 +99,132 @@ export const login = async (req , res) => {
 		})
 	}
 
+}
+
+export const forgetPassword = async (req, res) => {
+	const userData = req.body;
+	try{
+		const user = await User.findOne(userData).exec();
+
+		if(!user){
+			return res.status(401).json({
+				success:false,
+				message:"No user with the given data found"
+			})
+		}
+
+		const payload = {
+			email:user.email,
+			phone:user.phone,
+			username:user.username
+		}
+
+		const token = generateJwtToken(payload);
+		const subject = "Reset Password for NJATH"
+		const mailText = `Hello,${user.username}\n\n`+
+		"Please click on the link below to reset your password\n"+
+		`${config.frontendUrl}/api/auth/reset-password/${token}\n\n`+
+		"Thank you\n\nTeam NJATH"
+
+		let result = false;
+		try{
+			result = await sendMail(user.email,subject,mailText);
+		}
+		catch(e){
+			logger.error(e);
+			return res.status(500).json({
+				success:false,
+				message:"server error"
+			})
+		}
+
+		if(!result){
+			return res.status(500).json({
+				success:false,
+				message:"Mail not sent please provide correct credentials"
+			})
+		}
+
+		return res.status(200).json({
+			success:true,
+			message:"Mail sent , please check your inbox, dont forget to check your spam as well"
+		})
+
+	}
+	catch(e){
+		logger.error(e);
+		return res.status(500).json({
+			success:false,
+			message:"Action failed ,please try again"
+		})
+	}
+}
+
+export const resetPassword = async (req,res) => {
+	const token = req.params.token;
+	const userData = req.body;
+
+	if(!token){
+		return res.status(401).json({
+			success:false,
+			message:"Token not found"
+		})
+	}
+
+	try{
+		const payload = checkJwtToken(token);
+		if(!payload.email || !payload.phone || !payload.username){
+			return res.status(401).json({
+				success:false,
+				message:"Invalid token"
+			})
+		}
+
+		try{
+			const user = await User.findOne({
+				email:payload.email,
+				username:payload.username,
+				phone:payload.phone,
+			})
+
+			if(!user){
+				res.status(401).json({
+					success:false,
+					message:"Invalid token"
+				})
+			}
+
+			userData.password = await hashPassword(userData.password);
+
+			user.password = userData.password;
+
+			try{
+				const updatedData = await user.save();
+				return res.status(200).json({
+					success:true,
+					message:"Password succesfully reset"
+				})
+			}catch(e){
+				logger.error(e);
+				return res.status(500).json({
+					success:false,
+					message:"Password reset failed"
+				})
+			}
+		}
+		catch(e){
+			logger.error(e);
+			res.status(500).json({
+				success:false,
+				message:"Password reset failed"
+			})
+		}
+	}
+	catch(e){
+		logger.error(e)
+		return res.status(401).json({
+			success:false,
+			message:"Invalid token"
+		})
+	}
 }

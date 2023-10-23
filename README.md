@@ -13,6 +13,9 @@
     PORT=
     MONGODB_URL=mongodb://localhost:27017/njath
     JWT_SECRET=
+    APP_PASSWORD=
+    SMTP_EMAIL=
+    FRONTEND_URL= #dont use / in the end , 1) 'https://example.com' <= correct , 2) 'https://example.com/' <= incorrect
     ```
 3) install node_modules
 4) run the server with app.js file
