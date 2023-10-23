@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import config from "../config/default.mjs";
+import { InitialiseEmptyMatrix } from "../utils/auth.util.js";
 
 export const USER_ROLE = {
 	PARTICIPANT: "PARTICIPANT",
@@ -46,6 +47,14 @@ const participantSchema = new mongoose.Schema({
 		type: Number,
 		default: config.initialPoints,
 	},
+	remainingLoan:{
+		type:Number,
+		default:config.allowedLoan
+	},
+	correctAnswers:{
+		type:[[Number]],
+		default:InitialiseEmptyMatrix
+	}
 });
 
 const adminSchema = new mongoose.Schema({

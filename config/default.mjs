@@ -13,4 +13,11 @@ export default {
 	allowedLoan:2,
 	loginExpiry:'300h',
 	cookieExpiry:1080000, // recommended to keep loginExpiry and cookie expiry the same
+	maxLevels:6,
+	maxQuestioninLevel:8,
+	questionOpenPenelty:10,
+	wrongAnswerPenalty:15,
+	rightAnswerBonous:25,
+	hintPenalty:5,
+	minQuestionToclearLevel:6
 };

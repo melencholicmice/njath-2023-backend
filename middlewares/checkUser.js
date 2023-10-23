@@ -10,7 +10,7 @@ export const  checkUser =  (userRole) => {
         if(!token){
             return res.status(401).json({
                     success:false,
-                    message:"Token not found"
+                    message:"Unauthorised, Token not found"
             });
         }
 
@@ -19,7 +19,7 @@ export const  checkUser =  (userRole) => {
             if(!payload.username || !payload.email || !payload.phone){
                 return res.status(401).json({
                     success:false,
-                    message:"Invalid token"
+                    message:"Unauthorised, Invalid token"
                 })
             }
 
@@ -32,11 +32,18 @@ export const  checkUser =  (userRole) => {
             if(!user){
                 return res.status(401).json({
                     success:false,
-                    message:"Invalid token"
+                    message:"Unauthorised, Invalid token"
                 })
             }
 
-            if(user.role !== userRole){
+            let roleFound = false;
+            userRole.forEach((role) => {
+                if(user.role === role){
+                    roleFound = true;
+                }
+            });
+
+            if(!roleFound){
                 return res.status(403).json({
                     success:false,
                     message:"You are not authorised for this action"

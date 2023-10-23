@@ -6,11 +6,17 @@ import logger from "./utils/logger.js";
 import morgan from "morgan";
 import authRouter from "./routes/auth.route.js";
 import { connectdb } from "./utils/connectDb.js";
+import questionRouter from "./routes/question.route.js";
+import { checkUser } from "./middlewares/checkUser.js";
+import { USER_ROLE } from "./models/user.model.js";
+import participantRoutes from "./routes/participant.route.js";
 
 const app = express();
 
 // -----------MIDDLEWARE-------------
-app.use(cors());
+app.use(cors({
+	origin:"*"
+}));
 app.use(express.json());
 app.use(cookieParser())
 
@@ -26,11 +32,13 @@ app.use(morgan(":pino-logger"));
 // -----------ROUTES---------------
 
 app.use("/api/auth", authRouter);
+app.use("/api/question",questionRouter);
+app.use("/api/participant",checkUser([USER_ROLE.PARTICIPANT]),participantRoutes);
 
-app.use((err, req, res, next) => {
-	console.error(err.stack);
-	res.status(500).send("Something broke 💩");
-});
+// app.use((err, req, res, next) => {
+// 	console.error(err.stack);
+// 	res.status(500).send("Something broke 💩");
+// });
 
 app.use("*", (req, res, next) => {
 	return res.status(404).json({

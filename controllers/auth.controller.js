@@ -59,7 +59,7 @@ export const login = async (req , res) => {
 			const match = await comparePassword(userData.password,user.password);
 
 			if(!match){
-				res.status(401).josn({
+				res.status(401).json({
 					success:false,
 					message:"Incorrect password"
 				});
@@ -74,7 +74,7 @@ export const login = async (req , res) => {
 			const acessToken = generateJwtToken(payload);
 
 			res.cookie('access_token', acessToken, {
-			    // httpOnly: true,
+			    httpOnly: true,
 			    maxAge: config.cookieExpiry,
 			});
 

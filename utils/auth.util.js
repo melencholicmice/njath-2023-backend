@@ -7,10 +7,10 @@ import logger from "./logger.js";
 
 // --------- SCHEMAS --------------------
 export const userSchemaRegister = Joi.object({
-	username: Joi.string().alphanum().min(3).max(30).required(),
+	username: Joi.string().min(3).max(30).required(),
 	password: Joi.string().min(8).required(),
 	email: Joi.string().email().required(),
-	phone: Joi.string().required(),
+	phone: Joi.string().pattern(/^[0-9]+$/).required(),
 	fullname: Joi.string().required(),
 });
 
@@ -21,7 +21,7 @@ export const userSchemaLogin = Joi.object({
 
 export const userSchemaForgetPassword = Joi.object({
 	email: Joi.string().email().required(),
-	phone: Joi.string().required(),
+	phone: Joi.string().pattern(/^[0-9]+$/).required(),
 })
 
 export const userSchemaResetPassword = Joi.object({
@@ -108,4 +108,15 @@ export async function sendMail(to,subject,text){
 		logger.error(e);
 		return false;
 	}
+}
+
+export  function InitialiseEmptyMatrix(){
+	let matrix = [];
+	let emptyArray = [];
+
+	for(let i = 0 ; i < config.maxLevels;i++){
+		matrix.push(emptyArray);
+	}
+
+	return matrix;
 }

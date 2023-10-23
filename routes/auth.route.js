@@ -16,13 +16,13 @@ authRouter.post(
 authRouter.post(
 	"/register-organiser",
 	validateBody(userSchemaRegister),
-	checkUser(USER_ROLE.ADMIN),
+	checkUser([USER_ROLE.ADMIN]),
 	registerParticipant(USER_ROLE.ORGANIZER)
 )
 
 authRouter.get(
 	"/login",
-	checkUser(USER_ROLE.PARTICIPANT),
+	checkUser([USER_ROLE.PARTICIPANT]),
 	(req,res)=>{
 		return res.status(200).json({
 			message:"Login succesful",
