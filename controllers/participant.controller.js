@@ -210,7 +210,7 @@ export const getHint = async (req,res) => {
     }
 }
 
-export const getCorrectAnswer = async (req,res) =>{
+export const getLevelDetails = async (req,res) =>{
     let user = req.user;
     const level = req.query.level;
 
@@ -232,18 +232,33 @@ export const getCorrectAnswer = async (req,res) =>{
         const correctQuestions = await QuestionResponse.find({
             level:level,
             participant:user._id,
-            isCorrect: true,
-        }).select('-_id order').exec();
+        }).select('-_id order isCorrect hintTaken').exec();
 
         const correctAnsArray = [];
+        const openedQuestions = [];
+        const hintOpenedQuestions = [];
+
         correctQuestions.map((ele)=>{
-            correctAnsArray.push(ele.order)
+            openedQuestions.push(ele.order);
+
+            if(ele.isCorrect){
+                correctAnsArray.push(ele.order);
+            }
+
+            if(ele.hintTaken){
+                hintOpenedQuestions.push(ele.order);
+            }
         })
 
         // :TODO: implement shifting
         return res.status(200).json({
             success:true,
-            data:correctAnsArray
+            data:{
+                correctAnswers:correctAnsArray,
+                totalQuestions:config.maxQuestioninLevel,
+                hintTaken:hintOpenedQuestions,
+                openedQuestions:openedQuestions
+            }
         })
     }
     catch(e){
@@ -346,11 +361,12 @@ export const getParticipantData = async (req,res) => {
     return res.status(200).json({
         success:true,
         data:{
-            isBaned:req.user.isBaned,
+            isBanned:req.user.isBaned,
             remainingLoan:req.user.remainingLoan,
             username:req.user.remainingLoan,
             email:req.user.email,
-            clearedLevels: levels
+            clearedLevels: levels,
+            points:req.user.points,
         }
     });
 }

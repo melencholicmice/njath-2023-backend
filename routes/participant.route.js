@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { answerQuestion, getCorrectAnswer, getHint, getLoan, getParticipantData, getQuestion } from "../controllers/participant.controller.js";
+import { answerQuestion, getLevelDetails, getHint, getLoan, getParticipantData, getQuestion } from "../controllers/participant.controller.js";
 import { validateBody } from "../middlewares/validateBody.js";
 import { answerQuestionSchema, hintSchema } from "../utils/participant.util.js";
 import { validateLevelParams } from "../middlewares/validateLevelParam.js";
@@ -18,8 +18,8 @@ participantRoutes.get(
 );
 
 participantRoutes.get(
-    "/get-correct-answer",
-    getCorrectAnswer
+    "/get-level-details",
+    getLevelDetails
 );
 
 participantRoutes.post(
