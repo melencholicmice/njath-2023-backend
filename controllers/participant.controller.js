@@ -3,32 +3,13 @@ import { Participant } from "../models/user.model.js";
 import config from "../config/default.mjs"
 import { frontendTobackendOrder, getClearedLevel } from "../utils/participant.util.js";
 import logger from "../utils/logger.js";
+import { levels } from "pino";
 
 export const getQuestion = async (req,res)=>{
     let user = req.user;
-    const level = req.query.level;
-    const frontendOrder = req.query.order;
+    let level = req.query.level;
+    let frontendOrder = req.query.order;
 
-    if (!level || isNaN(Number(level))) {
-        return res.status(400).json({
-            success:false,
-            message:'Invalid level parameter. Please provide a number.'
-        });
-    }
-
-    if (!frontendOrder || isNaN(Number(frontendOrder))) {
-        return res.status(400).json({
-            success:false,
-            message:'Invalid order parameter. Please provide a number.'
-        });
-    }
-
-    if(level > getClearedLevel(user)){
-        return res.status(401).json({
-            success:false,
-            message:"Clear previous levels first"
-        })
-    }
     // :TODO: implement shifting
     const order = frontendOrder;
 
@@ -86,7 +67,7 @@ export const getQuestion = async (req,res)=>{
         logger.error(e);
         return res.status(500).json({
             success:false,
-            message:"Coudn't fetch question"
+            message:"Action failed"
         })
     }
 }
@@ -272,4 +253,104 @@ export const getCorrectAnswer = async (req,res) =>{
             message:"Action failed"
         })
     }
+}
+
+export const getLoan = async (req,res) => {
+    let user = req.user;
+    const level = req.query.level;
+    const safe = req.query.safe;
+    const frontendOrder = req.query.order;
+
+    if (!safe || isNaN(Number(safe))) {
+        return res.status(400).json({
+            success:false,
+            message:'Invalid safe parameter. Please provide a number.'
+        });
+    }
+    // :TODO: implement shifting
+    const order = frontendOrder;
+
+    try{
+        const currUser = await Participant.findById(user._id);
+
+        let response = await QuestionResponse.findOne({
+            level:level,
+            order:order,
+            participant:currUser._id
+        }).exec();
+
+        if(response){
+            return res.status(401).json({
+                success:false,
+                message:"You have already opened this question"
+            });
+        }
+
+        if(currUser.remainingLoan <= 0){
+            return res.status(401).json({
+                success:false,
+                message:"You can't take more loan"
+            });
+        }
+
+
+        if(safe != 0){
+            console.log(safe);
+            if(currUser.points > config.loanPenalty){
+                return res.status(401).json({
+                    success:false,
+                    message:"You have enough points , you don't need to take loan"
+                });
+            }
+        }
+        response = new QuestionResponse({
+            level:level,
+            order:order,
+            participant:user._id,
+            opened:1
+        });
+
+        currUser.points-=config.loanPenalty;
+
+        await currUser.save();
+        await response.save();
+
+        const question = await Question.find({
+            level:level,
+            order:order
+        }).select('-_id title description imageUrl').exec();
+
+        res.status(200).json({
+            success:true,
+            data:question
+        });
+
+    }
+    catch(e){
+        logger.error(e);
+        return res.status(500).json({
+            success:false,
+            message:"Action failed"
+        })
+    }
+}
+
+export const getParticipantData = async (req,res) => {
+    let levels = getClearedLevel(req.user);
+
+    // covering a small edgecase
+    if(req.user.correctAnswers[0].length < config.minQuestionToclearLevel){
+        levels = 0;
+    }
+
+    return res.status(200).json({
+        success:true,
+        data:{
+            isBaned:req.user.isBaned,
+            remainingLoan:req.user.remainingLoan,
+            username:req.user.remainingLoan,
+            email:req.user.email,
+            clearedLevels: levels
+        }
+    });
 }

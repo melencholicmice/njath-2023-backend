@@ -123,7 +123,7 @@ export const forgetPassword = async (req, res) => {
 		const subject = "Reset Password for NJATH"
 		const mailText = `Hello,${user.username}\n\n`+
 		"Please click on the link below to reset your password\n"+
-		`${config.frontendUrl}/api/auth/reset-password/${token}\n\n`+
+		`${config.frontendUrl}/reset-password/${token}\n\n`+
 		"Thank you\n\nTeam NJATH"
 
 		let result = false;
@@ -147,7 +147,7 @@ export const forgetPassword = async (req, res) => {
 
 		return res.status(200).json({
 			success:true,
-			message:"Mail sent , please check your inbox, dont forget to check your spam as well"
+			message:"Mail sent , please check your inbox, don't forget to check your spam as well"
 		})
 
 	}

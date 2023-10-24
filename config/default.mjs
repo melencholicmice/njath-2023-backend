@@ -19,5 +19,6 @@ export default {
 	wrongAnswerPenalty:15,
 	rightAnswerBonous:25,
 	hintPenalty:5,
-	minQuestionToclearLevel:6
+	minQuestionToclearLevel:6,
+	loanPenalty:20
 };
