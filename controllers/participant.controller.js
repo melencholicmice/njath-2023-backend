@@ -363,10 +363,11 @@ export const getParticipantData = async (req,res) => {
         data:{
             isBanned:req.user.isBaned,
             remainingLoan:req.user.remainingLoan,
-            username:req.user.remainingLoan,
+            username:req.user.username,
             email:req.user.email,
             clearedLevels: levels,
             points:req.user.points,
+            totalLevel:config.maxLevels
         }
     });
 }

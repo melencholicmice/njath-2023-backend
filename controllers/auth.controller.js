@@ -49,57 +49,48 @@ export const login = async (req , res) => {
 		const user =  await User.findOne({email:userData.email})
 
 		if(!user){
-			res.status(401).json({
+			return res.status(401).json({
 				success:false,
 				message:"Incorrect email"
 			});
 		}
 
-		try{
-			const match = await comparePassword(userData.password,user.password);
+		const match = await comparePassword(userData.password,user.password);
 
-			if(!match){
-				res.status(401).json({
-					success:false,
-					message:"Incorrect password"
-				});
-			}
-
-			const payload = {
-				email:user.email,
-				username:user.username,
-				phone:user.phone
-			}
-
-			const acessToken = generateJwtToken(payload);
-
-			res.cookie('access_token', acessToken, {
-    			maxAge: 24 * 60 * 60 * 1000,
-    			httpOnly: true,
-    			secure: true,
-    			sameSite: 'Lax', // Controls when the cookie should be sent in cross-origin requests
-    			path: '/', // The path for which the cookie is valid (root path in this case)
-  			});
-
-			return res.status(200).json({
-				success:true,
-				message: 'Login successful'
-			});
-
-		}catch(e){
-			logger.error(e);
-			return res.status(500).json({
-			    success: false,
-			    message: 'An error occurred during login',
+		if(!match){
+			return res.status(401).json({
+				success:false,
+				message:"Incorrect password"
 			});
 		}
+
+		const payload = {
+			email:user.email,
+			username:user.username,
+			phone:user.phone
+		}
+
+		const acessToken = generateJwtToken(payload);
+
+		res.cookie('access_token', acessToken, {
+    		maxAge: 24 * 60 * 60 * 1000,
+    		httpOnly: true,
+    		secure: true,
+    		sameSite: 'Lax', // Controls when the cookie should be sent in cross-origin requests
+    		path: '/', // The path for which the cookie is valid (root path in this case)
+  		});
+
+		return res.status(200).json({
+			success:true,
+			message: 'Login successful'
+		});
 	}
 	catch(e){
-		logger.error(e)
-		res.status(500).json({
+		logger.error(e);
+		return res.status(500).json({
 			success:false,
 			message:"Login failed, sesrver error"
-		})
+		});
 	}
 
 }
