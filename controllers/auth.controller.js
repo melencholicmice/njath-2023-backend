@@ -74,9 +74,12 @@ export const login = async (req , res) => {
 			const acessToken = generateJwtToken(payload);
 
 			res.cookie('access_token', acessToken, {
-			    httpOnly: true,
-			    maxAge: config.cookieExpiry,
-			});
+    			maxAge: 24 * 60 * 60 * 1000,
+    			httpOnly: true,
+    			secure: true,
+    			sameSite: 'Lax', // Controls when the cookie should be sent in cross-origin requests
+    			path: '/', // The path for which the cookie is valid (root path in this case)
+  			});
 
 			return res.status(200).json({
 				success:true,

@@ -13,10 +13,17 @@ import participantRoutes from "./routes/participant.route.js";
 
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  // Add more origins as needed
+];
+
 // -----------MIDDLEWARE-------------
 app.use(cors({
-	origin:"*"
+	origin:allowedOrigins,
+	credentials: true,
 }));
+
 app.use(express.json());
 app.use(cookieParser())
 
