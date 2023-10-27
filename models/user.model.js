@@ -47,13 +47,13 @@ const participantSchema = new mongoose.Schema({
 		type: Number,
 		default: config.initialPoints,
 	},
-	remainingLoan:{
-		type:Number,
-		default:config.allowedLoan
+	remainingLoan: {
+		type: Number,
+		default: config.allowedLoan
 	},
-	correctAnswers:{
-		type:[[Number]],
-		default:InitialiseEmptyMatrix
+	correctAnswers: {
+		type: [[Number]],
+		default: InitialiseEmptyMatrix
 	}
 });
 

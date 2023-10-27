@@ -9,7 +9,7 @@ const questionRouter = Router();
 
 questionRouter.post(
     "/add-question",
-    checkUser([USER_ROLE.ORGANIZER,USER_ROLE.ADMIN]),
+    checkUser([USER_ROLE.ORGANIZER, USER_ROLE.ADMIN]),
     validateBody(addQuestionSchema),
     addQuestion
 );

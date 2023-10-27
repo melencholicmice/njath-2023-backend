@@ -9,8 +9,8 @@ export const addQuestion = async (req, res) => {
 
         if (existingQuestions.length >= config.maxQuestioninLevel) {
             return res.status(400).json({
-              success: false,
-              message: "Level is full, cannot add more questions",
+                success: false,
+                message: "Level is full, cannot add more questions",
             });
         }
 
@@ -27,7 +27,7 @@ export const addQuestion = async (req, res) => {
             success: true,
             message: "Question added successfully",
         });
-    }catch (e) {
+    } catch (e) {
         logger.error(e);
         return res.status(500).json({
             success: false,

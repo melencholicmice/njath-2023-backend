@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { answerQuestion, getLevelDetails, getHint, getLoan, getParticipantData, getQuestion } from "../controllers/participant.controller.js";
+import { answerQuestion, getLevelDetails, getHint, getLoan, getParticipantData, getQuestion, getLeaderBoard } from "../controllers/participant.controller.js";
 import { validateBody } from "../middlewares/validateBody.js";
 import { answerQuestionSchema, hintSchema } from "../utils/participant.util.js";
 import { validateLevelParams } from "../middlewares/validateLevelParam.js";
@@ -40,6 +40,11 @@ participantRoutes.get(
     validateLevelParams,
     getLoan
 );
+
+participantRoutes.get(
+    "/leaderboard",
+    getLeaderBoard
+)
 
 
 export default participantRoutes;

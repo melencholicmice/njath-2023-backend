@@ -60,61 +60,61 @@ export async function comparePassword(inputPassword, hashedPassword) {
 	}
 }
 
-export function generateJwtToken(payload){
+export function generateJwtToken(payload) {
 	const options = {
-  		expiresIn: config.loginExpiry
+		expiresIn: config.loginExpiry
 	};
-	const token = jwt.sign(payload,config.jwtSecret,options);
+	const token = jwt.sign(payload, config.jwtSecret, options);
 	return token;
 }
 
-export function checkJwtToken(token){
-	try{
-		const decoded = jwt.verify(token,config.jwtSecret);
+export function checkJwtToken(token) {
+	try {
+		const decoded = jwt.verify(token, config.jwtSecret);
 		return decoded
 	}
-	catch(error){
+	catch (error) {
 		throw error;
 	}
 }
 
-export async function sendMail(to,subject,text){
+export async function sendMail(to, subject, text) {
 	const transporter = nodemailer.createTransport({
-		host:"smtp.gmail.com",
-		port:587,
-		secure:false,
-		auth:{
-			user:config.smtpEmail,
-			pass:config.appPassword,
+		host: "smtp.gmail.com",
+		port: 587,
+		secure: false,
+		auth: {
+			user: config.smtpEmail,
+			pass: config.appPassword,
 		},
 		tls: {
-      		// do not fail on invalid certs
-      		rejectUnauthorized: false,
-    	},
+			// do not fail on invalid certs
+			rejectUnauthorized: false,
+		},
 	})
 
 	const mailData = {
-		from:config.smtpEmail,
-		to:to,
-		subject:subject,
-		text:text,
+		from: config.smtpEmail,
+		to: to,
+		subject: subject,
+		text: text,
 	}
 
-	try{
+	try {
 		await transporter.sendMail(mailData);
 		return true;
 	}
-	catch(e){
+	catch (e) {
 		logger.error(e);
 		return false;
 	}
 }
 
-export  function InitialiseEmptyMatrix(){
+export function InitialiseEmptyMatrix() {
 	let matrix = [];
 	let emptyArray = [];
 
-	for(let i = 0 ; i < config.maxLevels;i++){
+	for (let i = 0; i < config.maxLevels; i++) {
 		matrix.push(emptyArray);
 	}
 

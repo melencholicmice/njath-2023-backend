@@ -1,6 +1,6 @@
-import config  from "../config/default.mjs";
+import config from "../config/default.mjs";
 import { Organizer, Participant, USER_ROLE, User } from "../models/user.model.js";
-import { getHash, hashPassword ,comparePassword, generateJwtToken, sendMail, checkJwtToken} from "../utils/auth.util.js";
+import { getHash, hashPassword, comparePassword, generateJwtToken, sendMail, checkJwtToken } from "../utils/auth.util.js";
 import logger from "../utils/logger.js";
 
 
@@ -13,83 +13,83 @@ export const registerParticipant = (role) => {
 		try {
 			let user = null;
 
-			if(role === USER_ROLE.PARTICIPANT){
+			if (role === USER_ROLE.PARTICIPANT) {
 				user = new Participant(params);
 			}
-			else{
+			else {
 				user = new Organizer(params);
 			}
 
 			await user.save();
 			return res.status(201).json({
-				success:true,
+				success: true,
 				message: "user created succesfully",
 			});
 		} catch (e) {
 			if (e.code === 11000) {
 				// Duplicate key error (MongoDB error code 11000)
 				return res.status(409).json({
-					success:false,
+					success: false,
 					message: "some user with same fields already exists",
 				});
 			} else {
 				logger.error(e);
 				return res.status(500).json({
-					success:false,
+					success: false,
 					message: "User was not created",
 				});
 			}
 		}
-    };
+	};
 }
 
-export const login = async (req , res) => {
+export const login = async (req, res) => {
 	const userData = req.body;
-	try{
-		const user =  await User.findOne({email:userData.email})
+	try {
+		const user = await User.findOne({ email: userData.email })
 
-		if(!user){
+		if (!user) {
 			return res.status(401).json({
-				success:false,
-				message:"Incorrect email"
+				success: false,
+				message: "Incorrect email"
 			});
 		}
 
-		const match = await comparePassword(userData.password,user.password);
+		const match = await comparePassword(userData.password, user.password);
 
-		if(!match){
+		if (!match) {
 			return res.status(401).json({
-				success:false,
-				message:"Incorrect password"
+				success: false,
+				message: "Incorrect password"
 			});
 		}
 
 		const payload = {
-			email:user.email,
-			username:user.username,
-			phone:user.phone
+			email: user.email,
+			username: user.username,
+			phone: user.phone
 		}
 
 		const acessToken = generateJwtToken(payload);
 
 		res.cookie('access_token', acessToken, {
-    		maxAge: 24 * 60 * 60 * 1000,
-    		httpOnly: true,
-    		secure: true,
-    		sameSite: 'Lax', // Controls when the cookie should be sent in cross-origin requests
-    		path: '/', // The path for which the cookie is valid (root path in this case)
-  		});
+			maxAge: 24 * 60 * 60 * 1000,
+			httpOnly: true,
+			secure: true,
+			sameSite: 'Lax', // Controls when the cookie should be sent in cross-origin requests
+			path: '/', // The path for which the cookie is valid (root path in this case)
+		});
 
 		return res.status(200).json({
-			success:true,
+			success: true,
 			message: 'Login successful'
 		});
 	}
-	catch(e){
+	catch (e) {
 		logger.error(e);
 		return res.status(500).json({
-			success:false,
-			message:"Login failed, sesrver error"
+			success: false,
+			message: "Login failed, sesrver error"
 		});
 	}
 
@@ -97,94 +97,94 @@ export const login = async (req , res) => {
 
 export const forgetPassword = async (req, res) => {
 	const userData = req.body;
-	try{
+	try {
 		const user = await User.findOne(userData).exec();
 
-		if(!user){
+		if (!user) {
 			return res.status(401).json({
-				success:false,
-				message:"No user with the given data found"
+				success: false,
+				message: "No user with the given data found"
 			})
 		}
 
 		const payload = {
-			email:user.email,
-			phone:user.phone,
-			username:user.username
+			email: user.email,
+			phone: user.phone,
+			username: user.username
 		}
 
 		const token = generateJwtToken(payload);
 		const subject = "Reset Password for NJATH"
-		const mailText = `Hello,${user.username}\n\n`+
-		"Please click on the link below to reset your password\n"+
-		`${config.frontendUrl}/reset-password/${token}\n\n`+
-		"Thank you\n\nTeam NJATH"
+		const mailText = `Hello,${user.username}\n\n` +
+			"Please click on the link below to reset your password\n" +
+			`${config.frontendUrl}/reset-password/${token}\n\n` +
+			"Thank you\n\nTeam NJATH"
 
 		let result = false;
-		try{
-			result = await sendMail(user.email,subject,mailText);
+		try {
+			result = await sendMail(user.email, subject, mailText);
 		}
-		catch(e){
+		catch (e) {
 			logger.error(e);
 			return res.status(500).json({
-				success:false,
-				message:"server error"
+				success: false,
+				message: "server error"
 			})
 		}
 
-		if(!result){
+		if (!result) {
 			return res.status(500).json({
-				success:false,
-				message:"Mail not sent please provide correct credentials"
+				success: false,
+				message: "Mail not sent please provide correct credentials"
 			})
 		}
 
 		return res.status(200).json({
-			success:true,
-			message:"Mail sent , please check your inbox, don't forget to check your spam as well"
+			success: true,
+			message: "Mail sent , please check your inbox, don't forget to check your spam as well"
 		})
 
 	}
-	catch(e){
+	catch (e) {
 		logger.error(e);
 		return res.status(500).json({
-			success:false,
-			message:"Action failed ,please try again"
+			success: false,
+			message: "Action failed ,please try again"
 		})
 	}
 }
 
-export const resetPassword = async (req,res) => {
+export const resetPassword = async (req, res) => {
 	const token = req.params.token;
 	const userData = req.body;
 
-	if(!token){
+	if (!token) {
 		return res.status(401).json({
-			success:false,
-			message:"Token not found"
+			success: false,
+			message: "Token not found"
 		})
 	}
 
-	try{
+	try {
 		const payload = checkJwtToken(token);
-		if(!payload.email || !payload.phone || !payload.username){
+		if (!payload.email || !payload.phone || !payload.username) {
 			return res.status(401).json({
-				success:false,
-				message:"Invalid token"
+				success: false,
+				message: "Invalid token"
 			})
 		}
 
-		try{
+		try {
 			const user = await User.findOne({
-				email:payload.email,
-				username:payload.username,
-				phone:payload.phone,
+				email: payload.email,
+				username: payload.username,
+				phone: payload.phone,
 			})
 
-			if(!user){
+			if (!user) {
 				res.status(401).json({
-					success:false,
-					message:"Invalid token"
+					success: false,
+					message: "Invalid token"
 				})
 			}
 
@@ -192,33 +192,52 @@ export const resetPassword = async (req,res) => {
 
 			user.password = userData.password;
 
-			try{
+			try {
 				const updatedData = await user.save();
 				return res.status(200).json({
-					success:true,
-					message:"Password succesfully reset"
+					success: true,
+					message: "Password succesfully reset"
 				})
-			}catch(e){
+			} catch (e) {
 				logger.error(e);
 				return res.status(500).json({
-					success:false,
-					message:"Password reset failed"
+					success: false,
+					message: "Password reset failed"
 				})
 			}
 		}
-		catch(e){
+		catch (e) {
 			logger.error(e);
 			res.status(500).json({
-				success:false,
-				message:"Password reset failed"
+				success: false,
+				message: "Password reset failed"
 			})
 		}
 	}
-	catch(e){
+	catch (e) {
 		logger.error(e)
 		return res.status(401).json({
-			success:false,
-			message:"Invalid token"
+			success: false,
+			message: "Invalid token"
 		})
 	}
 }
+
+export const logout = (req, res) => {
+	try {
+		res.clearCookie('access_token', {
+			path: '/',
+		});
+
+		return res.status(200).json({
+			success: true,
+			message: 'Logged out successfully',
+		});
+	} catch (error) {
+		logger.error(error);
+		return res.status(500).json({
+			success: false,
+			message: 'Logout failed, server error',
+		});
+	}
+};

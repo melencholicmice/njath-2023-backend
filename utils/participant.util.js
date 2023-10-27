@@ -20,30 +20,30 @@ export const hintSchema = Joi.object({
 
 
 // -------------- GENERAL UTILS -------------
-export const getSumFromPhone = (phoneNumber)=>{
+export const getSumFromPhone = (phoneNumber) => {
     const digitArray = phoneNumber.split('').map(Number);
     const sum = digitArray.reduce((acc, digit) => acc + digit, 0);
     return sum;
 }
 
-export const frontendTobackendOrder = (frontendOrder,phoneNumber) =>{
+export const frontendTobackendOrder = (frontendOrder, phoneNumber) => {
     const sum = getSumFromPhone(phoneNumber);
 
     const shift = sum % config.maxQuestioninLevel;
 
-    frontendOrder+=config.maxQuestioninLevel;
-    frontendOrder-=shift;
+    frontendOrder += config.maxQuestioninLevel;
+    frontendOrder -= shift;
 
     return frontendOrder;
 }
 
-export const backendToFrontendOrder = (backendOrder,phoneNumber) => {
+export const backendToFrontendOrder = (backendOrder, phoneNumber) => {
     const sum = getSumFromPhone(phoneNumber);
 
-    const order = ((backendOrder+sum)%config.maxQuestioninLevel);
+    const order = ((backendOrder + sum) % config.maxQuestioninLevel);
 
-    if(order === 0){
-        order+=config.maxQuestioninLevel;
+    if (order === 0) {
+        order += config.maxQuestioninLevel;
     }
 
     return backendOrder;
@@ -53,8 +53,8 @@ export const getClearedLevel = (user) => {
     let clearedLevel = 1;
     const correctAnswers = user.correctAnswers;
 
-    for(let i = 1 ; i < config.maxLevels ; i++){
-        if (correctAnswers[i].length >= config.minQuestionToclearLevel){
+    for (let i = 1; i < config.maxLevels; i++) {
+        if (correctAnswers[i].length >= config.minQuestionToclearLevel) {
             i++;
             clearedLevel++;
         }

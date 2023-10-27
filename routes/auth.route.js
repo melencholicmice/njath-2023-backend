@@ -1,5 +1,5 @@
 import { Router, application } from "express";
-import { forgetPassword, login, registerParticipant, resetPassword } from "../controllers/auth.controller.js";
+import { forgetPassword, login, logout, registerParticipant, resetPassword } from "../controllers/auth.controller.js";
 import { validateBody } from "../middlewares/validateBody.js";
 import { userSchemaForgetPassword, userSchemaLogin, userSchemaRegister, userSchemaResetPassword } from "../utils/auth.util.js";
 import { checkUser } from "../middlewares/checkUser.js";
@@ -23,10 +23,10 @@ authRouter.post(
 authRouter.get(
 	"/login",
 	checkUser([USER_ROLE.PARTICIPANT]),
-	(req,res)=>{
+	(req, res) => {
 		return res.status(200).json({
-			message:"Login succesful",
-			success:true
+			message: "Login succesful",
+			success: true
 		})
 	}
 )
@@ -48,4 +48,10 @@ authRouter.post(
 	validateBody(userSchemaResetPassword),
 	resetPassword
 )
+
+authRouter.get(
+	"/logout",
+	logout
+)
+
 export default authRouter;

@@ -385,3 +385,33 @@ export const getParticipantData = async (req, res) => {
         }
     });
 }
+
+export const getLeaderBoard = async (req, res) => {
+    console.log("entered");
+
+    try {
+        const page = req.query.page;
+        const limit = req.query.limit;
+        const currentPage = parseInt(page) || 1;
+        const perPage = parseInt(limit) || 10;
+
+        const totalParticipants = await Participant.countDocuments();
+        const totalPages = Math.ceil(totalParticipants / perPage);
+
+        const participants = await Participant.find()
+            .select('-_id -__t username points')
+            .sort({ score: -1 }) // Sort participants by score in descending order
+            .skip((currentPage - 1) * perPage)
+            .limit(perPage);
+
+        return res.status(200).json({
+            data: participants,
+            totalParticipants,
+            totalPages,
+            currentPage,
+        });
+    } catch (error) {
+        logger.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
