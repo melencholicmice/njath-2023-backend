@@ -3,9 +3,8 @@ import { Participant } from "../models/user.model.js";
 import config from "../config/default.mjs"
 import { frontendTobackendOrder, getClearedLevel } from "../utils/participant.util.js";
 import logger from "../utils/logger.js";
-import { levels } from "pino";
 
-export const getQuestion = async (req,res)=>{
+export const getQuestion = async (req, res) => {
     let user = req.user;
     let level = req.query.level;
     let frontendOrder = req.query.order;
@@ -13,111 +12,111 @@ export const getQuestion = async (req,res)=>{
     // :TODO: implement shifting
     const order = frontendOrder;
 
-    try{
+    try {
         const response = await QuestionResponse.findOne({
-            level:level,
-            order:order,
-            participant:user._id
+            level: level,
+            order: order,
+            participant: user._id
         }).exec();
 
-        if(response){
-            response.opened+=1;
+        if (response) {
+            response.opened += 1;
             await response.save();
         }
-        else{
-            const currUser = await Participant.findOne({_id:user._id}).exec();
+        else {
+            const currUser = await Participant.findOne({ _id: user._id }).exec();
 
-            if(currUser.points < config.questionOpenPenelty){
+            if (currUser.points < config.questionOpenPenelty) {
                 return res.status(401).json({
-                    success:false,
-                    message:"You dont have enough points to perform this action"
+                    success: false,
+                    message: "You dont have enough points to perform this action"
                 })
             }
 
-            currUser.points-=config.questionOpenPenelty;
+            currUser.points -= config.questionOpenPenelty;
             await currUser.save();
 
             const newResponse = new QuestionResponse({
-                level:level,
-                order:order,
-                participant:user._id,
-                opened:1
+                level: level,
+                order: order,
+                participant: user._id,
+                opened: 1
             })
             await newResponse.save();
         }
 
         const question = await Question.findOne({
-            level:level,
-            order:order,
+            level: level,
+            order: order,
         }).select('-_id title description imageUrl').exec();
 
-        if(!question){
+        if (!question) {
             return res.status(400).json({
-                success:false,
-                message:"Question requested doesn't exist"
+                success: false,
+                message: "Question requested doesn't exist"
             })
         }
 
         return res.status(200).json({
-            success:true,
-            data:question
+            success: true,
+            data: question
         });
     }
-    catch(e){
+    catch (e) {
         logger.error(e);
         return res.status(500).json({
-            success:false,
-            message:"Action failed"
+            success: false,
+            message: "Action failed"
         })
     }
 }
 
-export const answerQuestion = async(req,res) => {
+export const answerQuestion = async (req, res) => {
     const data = req.body;
     const user = req.user;
 
     // :TODO: implement question shifting
     const order = data.order;
 
-    if(data.level > getClearedLevel(user)){
+    if (data.level > getClearedLevel(user)) {
         return res.status(401).json({
-            success:false,
-            message:"Clear previous levels first"
+            success: false,
+            message: "Clear previous levels first"
         })
     }
 
-    try{
+    try {
         const question = await Question.findOne({
-            level:data.level,
-            order:order
+            level: data.level,
+            order: order
         }).exec()
 
         const response = await QuestionResponse.findOne({
-            level:data.level,
-            order:order,
-            participant:user._id
+            level: data.level,
+            order: order,
+            participant: user._id
         }).exec();
 
-        if(!response){
+        if (!response) {
             return res.status(401).json({
-                success:false,
-                message:"You cannot answer question without opening it"
+                success: false,
+                message: "You cannot answer question without opening it"
             })
         }
 
-        if(response.isCorrect){
+        if (response.isCorrect) {
             return res.status(200).json({
-                success:true,
-                message:"You have already answered it"
+                success: true,
+                message: "You have already answered it"
             })
         }
 
-        if(question.answer === data.answer){
+        if (question.answer === data.answer) {
 
             let currUser = await Participant.findById(user._id);
 
             currUser.points += config.rightAnswerBonous;
-            currUser.correctAnswers[data.level-1].push(order);
+            currUser.correctAnswers[data.level - 1].push(order);
             await currUser.save();
 
             response.answered++;
@@ -125,68 +124,68 @@ export const answerQuestion = async(req,res) => {
             await response.save();
 
             return res.status(200).json({
-                success:true,
-                message:"Congrates! your answer was correct"
+                success: true,
+                message: "Congrates! your answer was correct"
             })
         }
-        else{
+        else {
             response.answered++;
             await response.save();
 
             return res.status(200).json({
-                success:false,
-                message:"Sorry,your answer was incorrect"
+                success: false,
+                message: "Sorry,your answer was incorrect"
             })
         }
     }
-    catch(e){
+    catch (e) {
         logger.error(e);
         return res.status(500).json({
-            success:false,
-            message:"Action failed"
+            success: false,
+            message: "Action failed"
         })
     }
 }
 
-export const getHint = async (req,res) => {
+export const getHint = async (req, res) => {
     const data = req.body;
     const user = req.user;
 
     // :TODO: implement question shifting
     const order = data.order;
-    if(data.level > getClearedLevel(user)){
+    if (data.level > getClearedLevel(user)) {
         return res.status(401).json({
-            success:false,
-            message:"Clear previous levels first"
+            success: false,
+            message: "Clear previous levels first"
         })
     }
 
-    try{
+    try {
         const response = await QuestionResponse.findOne({
-            level:data.level,
-            order:order,
-            participant:user._id
+            level: data.level,
+            order: order,
+            participant: user._id
         }).exec();
 
-        if(!response){
+        if (!response) {
             return res.status(401).json({
-                success:false,
-                message:"You cannot get hint of question without opening it"
+                success: false,
+                message: "You cannot get hint of question without opening it"
             })
         }
 
         const hint = await Question.findOne({
-            level:data.level,
-            order:order
+            level: data.level,
+            order: order
         }).select('-_id hint').exec();
 
-        if(!response.hintTaken){
+        if (!response.hintTaken) {
             let currUser = await Participant.findById(user._id);
 
-            if(currUser.points < config.hintPenalty){
+            if (currUser.points < config.hintPenalty) {
                 return res.status(401).json({
-                    success:false,
-                    message:"You don't have enough points to take hints"
+                    success: false,
+                    message: "You don't have enough points to take hints"
                 })
             }
 
@@ -197,80 +196,90 @@ export const getHint = async (req,res) => {
         }
 
         return res.status(200).json({
-            success:true,
-            data:hint
+            success: true,
+            data: hint
         })
     }
-    catch(e){
+    catch (e) {
         logger.error(e);
         return res.status(500).json({
-            success:false,
-            message:"Action failed"
+            success: false,
+            message: "Action failed"
         })
     }
 }
 
-export const getLevelDetails = async (req,res) =>{
+export const getLevelDetails = async (req, res) => {
     let user = req.user;
     const level = req.query.level;
 
     if (!level || isNaN(Number(level))) {
         return res.status(400).json({
-            success:false,
-            message:'Invalid level parameter. Please provide a number.'
+            success: false,
+            message: 'Invalid level parameter. Please provide a number.'
         });
     }
 
-    if(level > getClearedLevel(user)){
+    if (level > getClearedLevel(user)) {
         return res.status(401).json({
-            success:false,
-            message:"Clear previous levels first"
+            success: false,
+            message: "Clear previous levels first"
         })
     }
 
-    try{
+    try {
         const correctQuestions = await QuestionResponse.find({
-            level:level,
-            participant:user._id,
+            level: level,
+            participant: user._id,
         }).select('-_id order isCorrect hintTaken').exec();
 
-        const correctAnsArray = [];
-        const openedQuestions = [];
-        const hintOpenedQuestions = [];
+        const questions = [];
 
-        correctQuestions.map((ele)=>{
-            openedQuestions.push(ele.order);
+        for (let i = 0; i < config.maxQuestioninLevel; i++) {
+            const obj = {};
+            obj[`type`] = 0;
+            obj[`title`] = `Question ${i + 1}`;
+            questions.push(obj);
+        }
 
-            if(ele.isCorrect){
-                correctAnsArray.push(ele.order);
+        /**
+         * 0 -> not opened
+         * 1 -> opened
+         * 2 -> hint taken
+         * 3 -> answered
+         */
+        correctQuestions.map((ele, index) => {
+            questions[ele.order - 1][`type`] = 1;
+
+            if (ele.hintTaken) {
+                questions[ele.order - 1][`type`] = 2;
             }
 
-            if(ele.hintTaken){
-                hintOpenedQuestions.push(ele.order);
+            if (ele.isCorrect) {
+                questions[ele.order - 1][`type`] = 3;
             }
+
         })
 
         // :TODO: implement shifting
         return res.status(200).json({
-            success:true,
-            data:{
-                correctAnswers:correctAnsArray,
-                totalQuestions:config.maxQuestioninLevel,
-                hintTaken:hintOpenedQuestions,
-                openedQuestions:openedQuestions
+            success: true,
+            data: {
+                question: questions,
+                totalQuestions: config.maxQuestioninLevel,
             }
         })
     }
-    catch(e){
+    catch (e) {
         logger.error(e);
         return res.status(500).json({
-            success:false,
-            message:"Action failed"
+            success: false,
+            message: "Action failed"
         })
     }
 }
 
-export const getLoan = async (req,res) => {
+export const getLoan = async (req, res) => {
     let user = req.user;
     const level = req.query.level;
     const safe = req.query.safe;
@@ -278,96 +287,101 @@ export const getLoan = async (req,res) => {
 
     if (!safe || isNaN(Number(safe))) {
         return res.status(400).json({
-            success:false,
-            message:'Invalid safe parameter. Please provide a number.'
+            success: false,
+            message: 'Invalid safe parameter. Please provide a number.'
         });
     }
     // :TODO: implement shifting
     const order = frontendOrder;
 
-    try{
+    try {
         const currUser = await Participant.findById(user._id);
 
         let response = await QuestionResponse.findOne({
-            level:level,
-            order:order,
-            participant:currUser._id
+            level: level,
+            order: order,
+            participant: currUser._id
         }).exec();
 
-        if(response){
+        if (response) {
             return res.status(401).json({
-                success:false,
-                message:"You have already opened this question"
+                success: false,
+                message: "You have already opened this question"
             });
         }
 
-        if(currUser.remainingLoan <= 0){
+        if (currUser.remainingLoan <= 0) {
             return res.status(401).json({
-                success:false,
-                message:"You can't take more loan"
+                success: false,
+                message: "You can't take more loan"
             });
         }
 
 
-        if(safe != 0){
+        if (safe != 0) {
             console.log(safe);
-            if(currUser.points > config.loanPenalty){
+            if (currUser.points > config.loanPenalty) {
                 return res.status(401).json({
-                    success:false,
-                    message:"You have enough points , you don't need to take loan"
+                    success: false,
+                    message: "You have enough points , you don't need to take loan"
                 });
             }
         }
         response = new QuestionResponse({
-            level:level,
-            order:order,
-            participant:user._id,
-            opened:1
+            level: level,
+            order: order,
+            participant: user._id,
+            opened: 1
         });
 
-        currUser.points-=config.loanPenalty;
+        currUser.points -= config.loanPenalty;
 
         await currUser.save();
         await response.save();
 
         const question = await Question.find({
-            level:level,
-            order:order
+            level: level,
+            order: order
         }).select('-_id title description imageUrl').exec();
 
         res.status(200).json({
-            success:true,
-            data:question
+            success: true,
+            data: question
         });
 
     }
-    catch(e){
+    catch (e) {
         logger.error(e);
         return res.status(500).json({
-            success:false,
-            message:"Action failed"
+            success: false,
+            message: "Action failed"
         })
     }
 }
 
-export const getParticipantData = async (req,res) => {
+export const getParticipantData = async (req, res) => {
     let levels = getClearedLevel(req.user);
 
     // covering a small edgecase
-    if(req.user.correctAnswers[0].length < config.minQuestionToclearLevel){
+    if (req.user.correctAnswers[0].length < config.minQuestionToclearLevel) {
         levels = 0;
     }
 
+    const levelDetail = [];
+    for (let i = 0; i < config.maxLevels; i++) {
+        const isUnlocked = i > levels ? 0 : 1;
+        levelDetail.push(isUnlocked);
+    }
+
     return res.status(200).json({
-        success:true,
-        data:{
-            isBanned:req.user.isBaned,
-            remainingLoan:req.user.remainingLoan,
-            username:req.user.username,
-            email:req.user.email,
-            clearedLevels: levels,
-            points:req.user.points,
-            totalLevel:config.maxLevels
+        success: true,
+        data: {
+            isBanned: req.user.isBaned,
+            remainingLoan: req.user.remainingLoan,
+            username: req.user.username,
+            email: req.user.email,
+            points: req.user.points,
+            levelDetail: levelDetail
         }
     });
 }

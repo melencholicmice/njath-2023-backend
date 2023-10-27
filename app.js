@@ -14,13 +14,13 @@ import participantRoutes from "./routes/participant.route.js";
 const app = express();
 
 const allowedOrigins = [
-  'http://localhost:3000',
-  // Add more origins as needed
+	'http://localhost:3000',
+	// Add more origins as needed
 ];
 
 // -----------MIDDLEWARE-------------
 app.use(cors({
-	origin:allowedOrigins,
+	origin: allowedOrigins,
 	credentials: true,
 }));
 
@@ -39,8 +39,8 @@ app.use(morgan(":pino-logger"));
 // -----------ROUTES---------------
 
 app.use("/api/auth", authRouter);
-app.use("/api/question",questionRouter);
-app.use("/api/participant",checkUser([USER_ROLE.PARTICIPANT]),participantRoutes);
+app.use("/api/question", questionRouter);
+app.use("/api/participant", checkUser([USER_ROLE.PARTICIPANT]), participantRoutes);
 
 // app.use((err, req, res, next) => {
 // 	console.error(err.stack);
