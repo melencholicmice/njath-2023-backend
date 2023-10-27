@@ -11,7 +11,6 @@ export const getQuestion = async (req, res) => {
 
     // :TODO: implement shifting
     const order = frontendOrder;
-
     try {
         const response = await QuestionResponse.findOne({
             level: level,
@@ -48,7 +47,7 @@ export const getQuestion = async (req, res) => {
         const question = await Question.findOne({
             level: level,
             order: order,
-        }).select('-_id title description imageUrl').exec();
+        }).select('-_id title description imageUrl level order').exec();
 
         if (!question) {
             return res.status(400).json({
@@ -248,6 +247,7 @@ export const getLevelDetails = async (req, res) => {
          * 2 -> hint taken
          * 3 -> answered
          */
+        let questionSolved = 0;
         correctQuestions.map((ele, index) => {
             questions[ele.order - 1][`type`] = 1;
 
@@ -257,16 +257,18 @@ export const getLevelDetails = async (req, res) => {
 
             if (ele.isCorrect) {
                 questions[ele.order - 1][`type`] = 3;
+                questionSolved++;
             }
 
         })
-
+        const isSolved = config.maxQuestioninLevel === questionSolved ? true : false;
         // :TODO: implement shifting
         return res.status(200).json({
             success: true,
             data: {
                 question: questions,
                 totalQuestions: config.maxQuestioninLevel,
+                isSolved:isSolved,
             }
         })
     }
@@ -387,28 +389,23 @@ export const getParticipantData = async (req, res) => {
 }
 
 export const getLeaderBoard = async (req, res) => {
-    console.log("entered");
-
     try {
-        const page = req.query.page;
-        const limit = req.query.limit;
-        const currentPage = parseInt(page) || 1;
-        const perPage = parseInt(limit) || 10;
-
-        const totalParticipants = await Participant.countDocuments();
-        const totalPages = Math.ceil(totalParticipants / perPage);
-
+        const participantId = req.user.username;
         const participants = await Participant.find()
             .select('-_id -__t username points')
-            .sort({ score: -1 }) // Sort participants by score in descending order
-            .skip((currentPage - 1) * perPage)
-            .limit(perPage);
+            .sort({ score: -1 });
+
+        let rank = -1;
+        if (participantId) {
+            const participant = participants.find((p) => p.username === participantId);
+            if (participant) {
+                rank = participants.indexOf(participant) + 1;
+            }
+        }
 
         return res.status(200).json({
             data: participants,
-            totalParticipants,
-            totalPages,
-            currentPage,
+            myRank: rank,
         });
     } catch (error) {
         logger.error(error);

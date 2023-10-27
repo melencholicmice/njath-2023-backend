@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: backend-image
+    container_name: backend
+    restart: unless-stopped
+    networks:
+      - app-network
+  networks:
+      - app-network
+  webserver:
+    image: nginx:mainline-alpine
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      #  Add static site conf here
+      # - web-root:/var/www/html
+      - ./nginx-conf/nginx.conf:/etc/nginx/conf.d
+    depends_on:
+      - nodejs
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -19,3 +19,8 @@
     ```
 3) install node_modules
 4) run the server with app.js file
+
+#### Hosting instructions
+- nginx image is used as web server, It will directly configure your http traffic to localhost:8080
+- SSL certifaicate is not included but can be done by using certbot
+- before hosting make necessary changes in nginx-conf and docker-compose file
