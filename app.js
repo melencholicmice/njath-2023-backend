@@ -15,6 +15,7 @@ const app = express();
 
 const allowedOrigins = [
 	'http://localhost:3000',
+	'https://njath-2023.vercel.app',
 	// Add more origins as needed
 ];
 
