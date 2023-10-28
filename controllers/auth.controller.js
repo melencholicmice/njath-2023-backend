@@ -75,8 +75,8 @@ export const login = async (req, res) => {
 		res.cookie('access_token', acessToken, {
 			maxAge: 24 * 60 * 60 * 1000,
 			httpOnly: true,
-			secure: true,
-			sameSite: 'Lax', // Controls when the cookie should be sent in cross-origin requests
+			sameSite: 'None', // Allow cross-origin requests
+			domain: 'njath-2023.vercel.app', // Set the domain to your frontend's domain
 			path: '/', // The path for which the cookie is valid (root path in this case)
 		});
 
