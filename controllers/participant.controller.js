@@ -393,16 +393,19 @@ export const getParticipantData = async (req, res) => {
 export const getLeaderBoard = async (req, res) => {
     try {
         const participantId = req.user.username;
-        const participants = await Participant.find()
+        let participants = await Participant.find({
+            points: { $gt: 25 } // Limit to participants with points greater than 25
+        })
             .select('-_id -__t username points')
             .sort({ score: -1 });
 
-        let rank = -1;
-        if (participantId) {
-            const participant = participants.find((p) => p.username === participantId);
-            if (participant) {
-                rank = participants.indexOf(participant) + 1;
-            }
+        participants = participants.slice(0, 500); // Limit the response to the first 500 participants.
+
+        let rank = participants.findIndex((p) => p.username === participantId) + 1;
+
+        if (rank === 0) {
+            // Participant not found among the first 500, set rank to a value greater than the number of participants
+            rank = participants.length + 1;
         }
 
         return res.status(200).json({
@@ -414,3 +417,4 @@ export const getLeaderBoard = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
