@@ -53,7 +53,7 @@ export const getClearedLevel = (user) => {
     let clearedLevel = 1;
     const correctAnswers = user.correctAnswers;
 
-    for (let i = 1; i < config.maxLevels; i++) {
+    for (let i = 0; i < config.maxLevels; i++) {
         if (correctAnswers[i].length >= config.minQuestionToclearLevel) {
             clearedLevel++;
         }
