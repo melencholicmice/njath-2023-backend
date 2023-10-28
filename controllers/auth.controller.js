@@ -125,7 +125,7 @@ export const forgetPassword = async (req, res) => {
     const mailText =
       `Hello,${user.username}\n\n` +
       "Please click on the link below to reset your password\n" +
-      `${config.frontendUrl}/reset-password/${token}\n\n` +
+      `${config.frontendUrl}/resetPass/?token=${token}\n\n` +
       "Thank you\n\nTeam NJATH";
 
     let result = false;
