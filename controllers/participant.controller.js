@@ -218,8 +218,9 @@ export const getLevelDetails = async (req, res) => {
             message: 'Invalid level parameter. Please provide a number.'
         });
     }
+    const cleared = await getClearedLevel(user);
 
-    if (level > getClearedLevel(user)) {
+    if (level > cleared) {
         return res.status(401).json({
             success: false,
             message: "Clear previous levels first"
@@ -268,7 +269,7 @@ export const getLevelDetails = async (req, res) => {
             data: {
                 question: questions,
                 totalQuestions: config.maxQuestioninLevel,
-                isSolved:isSolved,
+                isSolved: isSolved,
             }
         })
     }

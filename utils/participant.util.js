@@ -1,6 +1,6 @@
 import config from "../config/default.mjs"
 import Joi from "joi";
-
+import { QuestionResponse } from "../models/question.model.js";
 
 // ---------- SCHEMAS ----------------------
 export const answerQuestionSchema = Joi.object({
@@ -49,17 +49,24 @@ export const backendToFrontendOrder = (backendOrder, phoneNumber) => {
     return backendOrder;
 }
 
-export const getClearedLevel = (user) => {
+export const getClearedLevel = async (user) => {
+    const userId = user._id;
     let clearedLevel = 1;
-    const correctAnswers = user.correctAnswers;
 
-    for (let i = 0; i < config.maxLevels; i++) {
-        if (correctAnswers[i].length >= config.minQuestionToclearLevel) {
-            clearedLevel++;
+    for (let i = 1; i < config.maxLevels; i++) {
+        try {
+            const solvedQuestions = await QuestionResponse.find({
+                level: i,
+                isCorrect: true,
+                participant: userId,
+            }).exec();
+
+            if (solvedQuestions.length >= config.minQuestionToclearLevel) {
+                clearedLevel++;
+            }
+        } catch (e) {
+            throw e;
         }
-		else {
-			break;
-		}
     }
 
     return clearedLevel;
