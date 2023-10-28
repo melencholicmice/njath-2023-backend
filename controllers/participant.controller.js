@@ -363,15 +363,16 @@ export const getLoan = async (req, res) => {
 }
 
 export const getParticipantData = async (req, res) => {
-    let levels = getClearedLevel(req.user);
-
+    let levels = await getClearedLevel(req.user) - 1;
+    console.log(levels);
     // covering a small edgecase
-    if (req.user.correctAnswers[0].length < config.minQuestionToclearLevel) {
-        levels = 0;
-    }
+    // if (req.user.correctAnswers[0].length < config.minQuestionToclearLevel) {
+    //     levels = 0;
+    // }
 
     const levelDetail = [];
-    for (let i = 0; i < config.maxLevels; i++) {
+    levelDetail.push(1);
+    for (let i = 1; i < config.maxLevels; i++) {
         const isUnlocked = i > levels ? 0 : 1;
         levelDetail.push(isUnlocked);
     }

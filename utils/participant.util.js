@@ -1,6 +1,7 @@
 import config from "../config/default.mjs"
 import Joi from "joi";
 import { QuestionResponse } from "../models/question.model.js";
+import logger from "./logger.js";
 
 // ---------- SCHEMAS ----------------------
 export const answerQuestionSchema = Joi.object({
@@ -64,10 +65,10 @@ export const getClearedLevel = async (user) => {
             if (solvedQuestions.length >= config.minQuestionToclearLevel) {
                 clearedLevel++;
             }
+
         } catch (e) {
             throw e;
         }
     }
-
     return clearedLevel;
 }
