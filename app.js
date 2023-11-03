@@ -16,15 +16,18 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   "https://njath-2023.vercel.app",
+  "https://njath-2023-demo.netlify.app",
   // Add more origins as needed
 ];
 
 // -----------MIDDLEWARE-------------
-app.use(cors({
-	origin: allowedOrigins,
-	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-	credentials: true,
-}));
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());
