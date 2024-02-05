@@ -1,31 +1,30 @@
-import mongoose from "mongoose";
-import config from "../config/default.mjs";
+import mongoose from 'mongoose'
+import config from '../config/default.mjs'
 
 const QuestionSchema = new mongoose.Schema({
-
     title: {
         type: String,
-        required: true
+        required: true,
     },
 
     description: {
         type: String,
-        required: true
+        required: true,
     },
 
     hint: {
         type: String,
-        required: true
+        required: true,
     },
 
     answer: {
         type: String,
-        required: true
+        required: true,
     },
 
     imageUrl: {
         type: String,
-        default: null
+        default: null,
     },
 
     level: Number,
@@ -40,31 +39,32 @@ const QuestionResponseSchema = new mongoose.Schema({
 
     participant: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Participant'
+        ref: 'Participant',
     },
 
     opened: {
         type: Number,
-        default: 0
+        default: 0,
     },
 
     answered: {
         type: Number,
-        default: 0
+        default: 0,
     },
 
     isCorrect: {
         type: Boolean,
-        default: false
+        default: false,
     },
 
     hintTaken: {
         type: Boolean,
-        default: false
+        default: false,
     },
 })
 
-export const Question = mongoose.model("Question", QuestionSchema);
-export const QuestionResponse = mongoose.model("QuestionResponse", QuestionResponseSchema);
-
-
+export const Question = mongoose.model('Question', QuestionSchema)
+export const QuestionResponse = mongoose.model(
+    'QuestionResponse',
+    QuestionResponseSchema,
+)
