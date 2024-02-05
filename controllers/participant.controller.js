@@ -316,7 +316,6 @@ export const getLoan = async (req, res) => {
         }
 
         if (safe != 0) {
-            console.log(safe)
             if (currUser.points > config.loanPenalty) {
                 return res.status(401).json({
                     success: false,
