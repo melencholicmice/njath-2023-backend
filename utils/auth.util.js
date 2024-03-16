@@ -1,9 +1,9 @@
 import Joi from 'joi'
 import bcrypt from 'bcrypt'
-import config from '../config/default.mjs'
 import jwt from 'jsonwebtoken'
-import nodemailer from 'nodemailer'
 import logger from './logger.js'
+import nodemailer from 'nodemailer'
+import config from '../config/default.mjs'
 
 // --------- SCHEMAS --------------------
 export const userSchemaRegister = Joi.object({

@@ -1,14 +1,14 @@
-import express from 'express'
 import cors from 'cors'
+import morgan from 'morgan'
+import express from 'express'
+import logger from './utils/logger.js'
 import cookieParser from 'cookie-parser'
 import config from './config/default.mjs'
-import logger from './utils/logger.js'
-import morgan from 'morgan'
 import authRouter from './routes/auth.route.js'
 import { connectdb } from './utils/connectDb.js'
-import questionRouter from './routes/question.route.js'
-import { checkUser } from './middlewares/checkUser.js'
 import { USER_ROLE } from './models/user.model.js'
+import { checkUser } from './middlewares/checkUser.js'
+import questionRouter from './routes/question.route.js'
 import participantRoutes from './routes/participant.route.js'
 
 const app = express()
@@ -25,6 +25,7 @@ const allowedOrigins = [
 app.use(
     cors({
         origin: allowedOrigins,
+        // NOTE: Allowing all methods currently, remove unused ones for more security
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         credentials: true,
     }),
@@ -58,6 +59,6 @@ app.use('*', (req, res, next) => {
 
 // -----------START SERVER------------
 app.listen(config.port, () => {
-    logger.info('🚀 Server is running on port 8080')
+    logger.info(`🚀 Server is running on port ${config.port}`)
 })
 connectdb()

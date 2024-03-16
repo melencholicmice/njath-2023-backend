@@ -1,7 +1,6 @@
-import config from '../config/default.mjs'
 import Joi from 'joi'
+import config from '../config/default.mjs'
 import { QuestionResponse } from '../models/question.model.js'
-import logger from './logger.js'
 
 // ---------- SCHEMAS ----------------------
 export const answerQuestionSchema = Joi.object({

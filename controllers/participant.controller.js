@@ -343,7 +343,7 @@ export const getLoan = async (req, res) => {
             .select('-_id title description imageUrl')
             .exec()
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: question,
         })
@@ -403,6 +403,6 @@ export const getLeaderBoard = async (req, res) => {
         })
     } catch (error) {
         logger.error(error)
-        res.status(500).json({ error: 'Internal Server Error' })
+        return res.status(500).json({ error: 'Internal Server Error' })
     }
 }

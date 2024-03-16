@@ -187,7 +187,7 @@ export const resetPassword = async (req, res) => {
             })
 
             if (!user) {
-                res.status(401).json({
+                return res.status(401).json({
                     success: false,
                     message: 'Invalid token',
                 })
@@ -212,7 +212,7 @@ export const resetPassword = async (req, res) => {
             }
         } catch (e) {
             logger.error(e)
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
                 message: 'Password reset failed',
             })
