@@ -96,7 +96,7 @@ export const login = async (req, res) => {
         logger.error(e)
         return res.status(500).json({
             success: false,
-            message: 'Login failed, sesrver error',
+            message: 'Login failed, server error',
         })
     }
 }
